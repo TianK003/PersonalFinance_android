@@ -80,12 +80,12 @@ dependencies {
     implementation(libs.androidx.datastore.preferences.core)
     // ML Kit Text Recognition
     implementation(libs.play.services.mlkit.text.recognition)
-
+    implementation(libs.play.services.mlkit.barcode.scanning)
     // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    // i hope this works
+    // android charting for the graphs
     implementation(libs.mpandroidchart.vv310)
 }
