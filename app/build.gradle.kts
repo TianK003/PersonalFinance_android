@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring(libs.desugar.jdk.libs.v215)
     implementation(libs.mp.android.chart)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
@@ -78,6 +78,14 @@ dependencies {
     //implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
+    // ML Kit Text Recognition
+    implementation(libs.play.services.mlkit.text.recognition)
+
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
     // i hope this works
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.mpandroidchart.vv310)
 }
