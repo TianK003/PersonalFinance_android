@@ -23,6 +23,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,16 +35,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import mau.se.personalfinance.viewmodels.AddTransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import mau.se.personalfinance.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +64,8 @@ fun AddTransactionScreen(
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val dateFormatter = rememberSaveable { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    var showCamera by rememberSaveable { mutableStateOf(false) }
+    var recognizedText by rememberSaveable { mutableStateOf("") }
 
     val categories = rememberSaveable(transactionType) {
         when (transactionType.lowercase()) {
@@ -111,12 +117,30 @@ fun AddTransactionScreen(
             }
 
             // Form fields
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (transactionType.equals("outcome", ignoreCase = true)) {
+                    IconButton(
+                        onClick = { showCamera = true },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_scanner),
+                            contentDescription = "Scan receipt",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -216,5 +240,17 @@ fun AddTransactionScreen(
                 Text("Save")
             }
         }
+    }
+
+    if (showCamera) {
+        CameraScreen(
+            onTextRecognized = { text ->
+                recognizedText = text
+                // Auto-populate description
+                description = text
+                showCamera = false
+            },
+            onCancel = { showCamera = false }
+        )
     }
 }
