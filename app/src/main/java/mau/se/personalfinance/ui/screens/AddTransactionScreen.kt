@@ -39,16 +39,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import mau.se.personalfinance.viewmodels.AddTransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import mau.se.personalfinance.R
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +60,7 @@ fun AddTransactionScreen(
     onBack: () -> Unit,
     viewModel: AddTransactionViewModel
 ) {
+    val context = LocalContext.current
     var description by rememberSaveable { mutableStateOf("") }
     var category by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
@@ -64,8 +68,13 @@ fun AddTransactionScreen(
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val dateFormatter = rememberSaveable { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
-    var showCamera by rememberSaveable { mutableStateOf(false) }
-    var recognizedText by rememberSaveable { mutableStateOf("") }
+
+    val options = GmsBarcodeScannerOptions.Builder()
+        .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+        .enableAutoZoom()
+        .build()
+    // --- Google Code Scanner Integration ---
+    val scanner = GmsBarcodeScanning.getClient(context, options)
 
     val categories = rememberSaveable(transactionType) {
         when (transactionType.lowercase()) {
@@ -130,7 +139,22 @@ fun AddTransactionScreen(
 
                 if (transactionType.equals("outcome", ignoreCase = true)) {
                     IconButton(
-                        onClick = { showCamera = true },
+                        onClick = { scanner.startScan()
+                            .addOnSuccessListener { barcode ->
+                                val rawValue: String? = barcode.rawValue
+                                // Handle the scanned barcode value
+                                // ideally ask a database what this is
+                                // but for proof of concept hardcoding a value is just fine
+                                if (rawValue == "7310350118342") {
+                                    description = "KEX choklad"
+                                }
+                            }
+                            .addOnCanceledListener {
+                                // Task canceled
+                            }
+                            .addOnFailureListener { e ->
+                                // Task failed with an exception
+                            } },
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
@@ -240,17 +264,5 @@ fun AddTransactionScreen(
                 Text("Save")
             }
         }
-    }
-
-    if (showCamera) {
-        CameraScreen(
-            onTextRecognized = { text ->
-                recognizedText = text
-                // Auto-populate description
-                description = text
-                showCamera = false
-            },
-            onCancel = { showCamera = false }
-        )
     }
 }
