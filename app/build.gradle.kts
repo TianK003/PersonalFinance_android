@@ -81,6 +81,8 @@ dependencies {
     // ML Kit Text Recognition
     implementation(libs.play.services.mlkit.text.recognition)
     implementation(libs.play.services.mlkit.barcode.scanning)
+    // actual stuff i use
+    implementation(libs.gms.play.services.code.scanner)
     // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
